@@ -47,6 +47,18 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
         
+        // Validate required fields
+        if (productDetails.getName() == null || productDetails.getName().trim().isEmpty() ||
+            productDetails.getPrice() == null || productDetails.getQuantity() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        // Validate price and quantity are non-negative
+        if (productDetails.getPrice().compareTo(java.math.BigDecimal.ZERO) < 0 || 
+            productDetails.getQuantity() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        
         Product product = productOptional.get();
         product.setName(productDetails.getName());
         product.setDescription(productDetails.getDescription());

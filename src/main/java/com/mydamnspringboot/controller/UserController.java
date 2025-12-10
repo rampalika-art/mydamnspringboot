@@ -31,6 +31,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -45,7 +48,14 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         
+        // Check if email is being changed to one that already exists
         User user = userOptional.get();
+        if (userDetails.getEmail() != null && !userDetails.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(userDetails.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+        }
+        
         user.setName(userDetails.getName());
         user.setEmail(userDetails.getEmail());
         User updatedUser = userRepository.save(user);
